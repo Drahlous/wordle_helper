@@ -117,3 +117,4 @@ class Game():
         best_word = self.pick_best_word(character_counts)
 
         print(f'You should probably choose: "{best_word}"...\n\n\n')
+
