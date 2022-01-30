@@ -11,10 +11,10 @@ Program to help solve word guessing games.
  2. Once you submit your guess on the website, enter the results you see for each letter
 
        - If the letter has a green background, you've put it in the correct place:
-           mark this character with "CharacterStatus.VALID
+           mark this character with "CharacterStatus.VALID"
 
        - If the letter has a yellow backgroud, it is present in the word, but at a different location:
-           mark this character with "CharacterStatus.MISPLACED
+           mark this character with "CharacterStatus.MISPLACED"
 
        - If the letter has a black background, it doesn't occur anywhere in the word:
            mark it with "CharacterStatus.INVALID"
