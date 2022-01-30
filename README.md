@@ -8,9 +8,11 @@ Program to help solve word guessing games.
 
 The tool is available as a docker image.
 To show a sample game, run the command:
+
 `docker run --rm -ti mattstachowiak/wordle_helper`
 
 If you want to peek around inside and edit the code, open the container to the bash shell:
+
 `docker run --rm -ti mattstachowiak/wordle_helper bash`
 `python3 simulate_game.py`
 
