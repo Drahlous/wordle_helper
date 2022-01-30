@@ -9,97 +9,97 @@ class CharacterStatus(Enum):
     INVALID = auto()
 
 def get_words():
-    return subprocess.run('./get_words.sh', stdout=subprocess.PIPE).stdout.decode('utf-8')
+    p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
+    return p.stdout.decode('utf-8').splitlines()
 
-words = set(get_words().splitlines())
+class Game():
+    def __init__(self):
+        self.potential_words = set(get_words())
+        self.required_characters = set()
+        self.character_positions = [set(string.ascii_lowercase) for _ in range(5)]
 
-positions = [set(string.ascii_lowercase) for _ in range(5)]
-required_characters = set()
+    # Check if the input word meets current constraints
+    def check_valid(self, word):
+        # If this word doesn't have one of the required characters, throw out the word
+        for letter in self.required_characters:
+            if letter not in word:
+                return False
+        # If one of the letters in this word is not valid for that position, throw out the word
+        for (letter, alphabet) in zip(word, self.character_positions):
+            if letter not in alphabet:
+                return False
+        # Otherwise, the word could be a valid choice
+        return True
 
+    # Update our knowledge of the positions
+    def update_positional_knowledge(self, result):
+        for (pos, (char, status)) in enumerate(result):
+            # If this spot is valid:
+            # - Remove every other character from this location's alphabet
+            # - Remove this character from the dictionaries of all other positions
+            if status is CharacterStatus.VALID:
+                self.character_positions[pos] = set(char)
 
-def print_status(char_positions, required):
-    print('Current Status:')
-    print('Required Characters: ' + str(required))
-    for alph in char_positions:
-        print(sorted(alph))
-    print('\n\n')
+            # If this spot is invalid, remove it from every alphabet
+            elif status is CharacterStatus.INVALID:
+                [x.discard(char) for x in self.character_positions]
 
-# Check if the input word meets current conditions
-def check_valid(char_positions, required, word):
-    for letter in required:
-        if letter not in word:
-            return False
+            # If the character is misplaced:
+            # - Add to the 'required' set
+            # - Remove from this position's dictionary
+            elif status is CharacterStatus.MISPLACED:
+                self.character_positions[pos].discard(char)
+                self.required_characters.add(char)
 
-    for (letter, alphabet) in zip(word, char_positions):
-        if letter not in alphabet:
-            return False
+    # Remove from our search space words which no longer satisfy our constraints
+    def update_word_list(self):
+        for word in list(self.potential_words):
+            if not self.check_valid(word):
+                self.potential_words.discard(word)
 
-    print(word + ' is a potential answer')
-    return True
+    # Print the list of words that we could still submit as a guess
+    def print_remaining_words(self):
+        [print(word) for word in sorted(list(self.potential_words))]
 
-# Update our knowledge of the positions
-def update(char_positions, result):
-    if all(status == CharacterStatus.VALID for (_char, status) in result):
-        print("Congratulations, you found the correct word!")
-        return
+    # Update game state
+    def update(self, result):
 
-    for (pos, (char, status)) in enumerate(result):
-        # If this spot is valid:
-        # - Remove every other character from this location's alphabet
-        # - Remove this character from the dictionaries of all other positions
-        if status is CharacterStatus.VALID:
-            # only needed if duplicates are not allowed: list(map(lambda x: x.discard(char), char_positions))
-            char_positions[pos] = set(char)
+        # Check if we've won
+        if all(status == CharacterStatus.VALID for (_, status) in result):
+            print("Congratulations, you found the correct word!")
+            return
 
-        # If this spot is invalid, remove it from every alphabet
-        elif status is CharacterStatus.INVALID:
-            list(map(lambda x: x.discard(char), char_positions))
+        # Update the set of valid characters for each position
+        self.update_positional_knowledge(result)
 
-        # If the character is misplaced:
-        # - Add to the 'required' set
-        # - Remove from this position's dictionary
-        elif status is CharacterStatus.MISPLACED:
-            char_positions[pos].discard(char)
-            required_characters.add(char)
+        # Update the set of valid words remaining
+        self.update_word_list()
+        self.print_remaining_words()
 
-    print_status(positions, required_characters)
-
-    # Update word list
-    for word in list(words):
-        if not check_valid(char_positions, required_characters, word):
-            words.discard(word)
-
-    print('\n\n')
 
 
 ## Game Start
-check_valid(positions, required_characters, 'adieu')
-update(positions, [
+my_game = Game()
+my_game.check_valid('adieu')
+my_game.update([
     ('a', CharacterStatus.INVALID),
     ('d', CharacterStatus.MISPLACED),
     ('i', CharacterStatus.INVALID),
     ('e', CharacterStatus.INVALID),
     ('u', CharacterStatus.MISPLACED)
 ])
-# Excluded = A, I, E
-# Must have D, but not in [1]
-# Must have U, but not in [4]
 
-check_valid(positions, required_characters, 'drunk')
-update(positions, [
+my_game.check_valid('drunk')
+my_game.update([
     ('d', CharacterStatus.MISPLACED),
     ('r', CharacterStatus.INVALID),
     ('u', CharacterStatus.VALID),
     ('n', CharacterStatus.INVALID),
     ('k', CharacterStatus.INVALID)
 ])
-# Excluded = A, I, E, R, N, K
-# Must have D, but not in [1]
-# Must have U, but not in [4]
-# U, is in [2]
 
-check_valid(positions, required_characters, 'would')
-update(positions, [
+my_game.check_valid('would')
+my_game.update([
     ('w', CharacterStatus.INVALID),
     ('o', CharacterStatus.VALID),
     ('u', CharacterStatus.VALID),
@@ -107,10 +107,8 @@ update(positions, [
     ('d', CharacterStatus.VALID)
 ])
 
-print(words)
-
-check_valid(positions, required_characters, 'could')
-update(positions, [
+my_game.check_valid('could')
+my_game.update([
     ('c', CharacterStatus.VALID),
     ('o', CharacterStatus.VALID),
     ('u', CharacterStatus.VALID),
