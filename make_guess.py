@@ -15,7 +15,6 @@ words = set(get_words().splitlines())
 
 positions = [set(string.ascii_lowercase) for _ in range(5)]
 required_characters = set()
-final_answer = [None for _ in range(5)]
 
 
 def print_status(char_positions, required):
@@ -29,20 +28,20 @@ def print_status(char_positions, required):
 def check_valid(char_positions, required, word):
     for letter in required:
         if letter not in word:
-            #print(word + ' NOT valid, does not contain a required char')
             return False
 
     for (letter, alphabet) in zip(word, char_positions):
         if letter not in alphabet:
-            #print(word + ' NOT valid, ' + letter + ' is not in alphabet: ' + str(alphabet))
             return False
+
     print(word + ' is a potential answer')
     return True
 
 # Update our knowledge of the positions
 def update(char_positions, result):
-    if all(status == CharacterStatus.VALID for status in result):
+    if all(status == CharacterStatus.VALID for (_char, status) in result):
         print("Congratulations, you found the correct word!")
+        return
 
     for (pos, (char, status)) in enumerate(result):
         # If this spot is valid:
@@ -64,9 +63,13 @@ def update(char_positions, result):
             required_characters.add(char)
 
     print_status(positions, required_characters)
+
+    # Update word list
     for word in list(words):
         if not check_valid(char_positions, required_characters, word):
             words.discard(word)
+
+    print('\n\n')
 
 
 ## Game Start
@@ -78,7 +81,6 @@ update(positions, [
     ('e', CharacterStatus.INVALID),
     ('u', CharacterStatus.MISPLACED)
 ])
-
 # Excluded = A, I, E
 # Must have D, but not in [1]
 # Must have U, but not in [4]
@@ -115,5 +117,4 @@ update(positions, [
     ('l', CharacterStatus.VALID),
     ('d', CharacterStatus.VALID)
 ])
-quit()
 
