@@ -3,14 +3,14 @@ import string
 from enum import Enum, auto
 import subprocess
 
+def get_words():
+    p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
+    return p.stdout.decode('utf-8').splitlines()
+
 class CharacterStatus(Enum):
     VALID = auto()
     MISPLACED = auto()
     INVALID = auto()
-
-def get_words():
-    p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
-    return p.stdout.decode('utf-8').splitlines()
 
 class Game():
     def __init__(self):
@@ -63,7 +63,6 @@ class Game():
 
     # Update game state
     def update(self, result):
-
         # Check if we've won
         if all(status == CharacterStatus.VALID for (_, status) in result):
             print("Congratulations, you found the correct word!")
@@ -75,44 +74,4 @@ class Game():
         # Update the set of valid words remaining
         self.update_word_list()
         self.print_remaining_words()
-
-
-
-## Game Start
-my_game = Game()
-my_game.check_valid('adieu')
-my_game.update([
-    ('a', CharacterStatus.INVALID),
-    ('d', CharacterStatus.MISPLACED),
-    ('i', CharacterStatus.INVALID),
-    ('e', CharacterStatus.INVALID),
-    ('u', CharacterStatus.MISPLACED)
-])
-
-my_game.check_valid('drunk')
-my_game.update([
-    ('d', CharacterStatus.MISPLACED),
-    ('r', CharacterStatus.INVALID),
-    ('u', CharacterStatus.VALID),
-    ('n', CharacterStatus.INVALID),
-    ('k', CharacterStatus.INVALID)
-])
-
-my_game.check_valid('would')
-my_game.update([
-    ('w', CharacterStatus.INVALID),
-    ('o', CharacterStatus.VALID),
-    ('u', CharacterStatus.VALID),
-    ('l', CharacterStatus.VALID),
-    ('d', CharacterStatus.VALID)
-])
-
-my_game.check_valid('could')
-my_game.update([
-    ('c', CharacterStatus.VALID),
-    ('o', CharacterStatus.VALID),
-    ('u', CharacterStatus.VALID),
-    ('l', CharacterStatus.VALID),
-    ('d', CharacterStatus.VALID)
-])
 
