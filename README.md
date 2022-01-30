@@ -5,6 +5,15 @@ Work in progress.
 Program to help solve word guessing games.
 
 ## Usage:
+
+The tool is available as a docker image.
+To show a sample game, run the command:
+`docker run --rm -ti mattstachowiak/wordle_helper`
+
+If you want to peek around inside and edit the code, open the container to the bash shell:
+`docker run --rm -ti mattstachowiak/wordle_helper bash`
+`python3 simulate_game.py`
+
 ```
  1. Decide on the word you want to guess, run check_valid to make sure it's still a valid guess
 
