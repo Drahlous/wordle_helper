@@ -59,13 +59,15 @@ class Game():
 
     # Print the list of words that we could still submit as a guess
     def print_remaining_words(self):
+        print('Here are the remaining words you might choose from:')
         [print(word) for word in sorted(list(self.potential_words))]
+        print()
 
     # Update game state
     def update(self, result):
         # Check if we've won
         if all(status == CharacterStatus.VALID for (_, status) in result):
-            print("Congratulations, you found the correct word!")
+            print('Congratulations, you found the correct word!')
             return
 
         # Update the set of valid characters for each position
