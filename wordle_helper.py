@@ -63,8 +63,42 @@ class Game():
         [print(word) for word in sorted(list(self.potential_words))]
         print()
 
+
+    # Find the number of occurences of each character in each word
+    def get_character_counts(self):
+        my_list = []
+        [my_list.append(dict()) for _ in self.character_positions]
+
+        for word in self.potential_words:
+            for (index, char) in enumerate(word):
+                my_list[index].setdefault(char, 0)
+                my_list[index][char] += 1
+        return my_list
+
+    # Pick the highest scoring word from the remaining set
+    # This will be the word with the highest total character score
+    def pick_best_word(self, character_counts):
+        max_score = 0
+        best_word = None
+
+        for word in self.potential_words:
+            score = 0
+            for (index, char) in enumerate(word):
+                score += character_counts[index][char]
+            if score > max_score or best_word is None:
+                best_word = word
+                max_score = score
+        return best_word
+
+
     # Update game state
     def update(self, result):
+
+        # Unpack the guess into a string
+        (letters, _) = zip(*result)
+        guess = ''.join(letters)
+        print(f'You guessed: {guess}')
+
         # Check if we've won
         if all(status == CharacterStatus.VALID for (_, status) in result):
             print('Congratulations, you found the correct word!')
@@ -75,5 +109,11 @@ class Game():
 
         # Update the set of valid words remaining
         self.update_word_list()
+
+        # Print the list of remaining words
         self.print_remaining_words()
 
+        character_counts = self.get_character_counts()
+        best_word = self.pick_best_word(character_counts)
+
+        print(f'You should probably choose: "{best_word}"...\n\n\n')
