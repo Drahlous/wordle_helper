@@ -3,23 +3,27 @@ import string
 from enum import Enum, auto
 import subprocess
 
-
-def get_words():
-    p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
-    return p.stdout.decode('utf-8').splitlines()
-
-class CharacterStatus(Enum):
-    VALID = auto()
-    MISPLACED = auto()
-    INVALID = auto()
-
 class Game():
+    class CharacterStatus(Enum):
+        VALID = auto()
+        MISPLACED = auto()
+        INVALID = auto()
+
     def __init__(self):
-        self.potential_words = set(sorted(get_words()))
+        self.potential_words = set(sorted(self.get_words()))
         self.required_characters = set()
         self.character_positions = [set(string.ascii_lowercase) for _ in range(5)]
-        best_word = self.pick_best_word()
-        print(f'You should probably choose: "{best_word}"...\n\n\n')
+        best_word = 'aesir'
+        print(f'To start, you should probably choose: "{best_word}"...\n\n\n')
+
+    # We'll build our own wordlist from the american dictionary
+    def get_words(self):
+        p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
+        return p.stdout.decode('utf-8').splitlines()
+
+    # Remove a word from our list of potential words
+    def remove_word(self, word):
+        self.potential_words.discard(word)
 
     # Check if the input word meets current constraints
     def check_valid(self, word):
@@ -40,17 +44,24 @@ class Game():
             # If this spot is valid:
             # - Remove every other character from this location's alphabet
             # - Remove this character from the dictionaries of all other positions
-            if status is CharacterStatus.VALID:
+            if status is self.CharacterStatus.VALID:
                 self.character_positions[pos] = set(char)
 
             # If this spot is invalid, remove it from every alphabet
-            elif status is CharacterStatus.INVALID:
-                [x.discard(char) for x in self.character_positions]
+            elif status is self.CharacterStatus.INVALID:
+                # If this is a required character (was previously marked MISPLACED)
+                # we'll just discard it from this position
+                if char in self.required_characters:
+                    self.character_positions[pos].discard(char)
+
+                # Otherwise, we can discard it from ALL positions
+                else:
+                    [x.discard(char) for x in self.character_positions]
 
             # If the character is misplaced:
             # - Add to the 'required' set
             # - Remove from this position's dictionary
-            elif status is CharacterStatus.MISPLACED:
+            elif status is self.CharacterStatus.MISPLACED:
                 self.character_positions[pos].discard(char)
                 self.required_characters.add(char)
 
@@ -58,7 +69,7 @@ class Game():
     def update_word_list(self):
         for word in list(self.potential_words):
             if not self.check_valid(word):
-                self.potential_words.discard(word)
+                self.remove_word(word)
 
     # Print the list of words that we could still submit as a guess
     def print_remaining_words(self):
@@ -72,7 +83,7 @@ class Game():
 
     # Just use a brute force solution, 
     # the search space is limited to american-english words
-    def get_score(self, word):
+    def get_word_score(self, word):
         remaining_words = set(self.potential_words.copy())
         for (index, char) in enumerate(word):
             for remaining_word in list(remaining_words):
@@ -81,12 +92,12 @@ class Game():
         return len(self.potential_words) - len(remaining_words)
 
     # Greedy Algorithm, pick the word that will eliminate the most other words
-    def pick_best_word(self):
+    def get_next_best_word(self):
         max_score = 0
         best_word = None
 
         for word in self.potential_words:
-            score = self.get_score(word)
+            score = self.get_word_score(word)
             if score > max_score or best_word is None:
                 best_word, max_score = word, score
         return (best_word, max_score)
@@ -100,7 +111,7 @@ class Game():
         print(f'You guessed: {guess}')
 
         # Check if we've won
-        if all(status == CharacterStatus.VALID for (_, status) in result):
+        if all(status == self.CharacterStatus.VALID for (_, status) in result):
             print('Congratulations, you found the correct word!')
             return
 
@@ -114,8 +125,5 @@ class Game():
         self.print_remaining_words()
 
         # Find the next best word
-        best_word = self.pick_best_word()
-
+        best_word = self.get_next_best_word()
         print(f'You should probably choose: "{best_word}"...\n')
-
-
