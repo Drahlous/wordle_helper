@@ -59,4 +59,31 @@ def SimulatePlayer():
     ])
 
 if __name__ == '__main__':
-    SimulatePlayer()
+    #SimulatePlayer()
+    my_game = Game()
+    my_game.check_valid('sales')
+    my_game.update([
+        ('s', CharacterStatus.INVALID),
+        ('a', CharacterStatus.INVALID),
+        ('l', CharacterStatus.INVALID),
+        ('e', CharacterStatus.INVALID),
+        ('s', CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('corny')
+    my_game.update([
+        ('c', CharacterStatus.INVALID),
+        ('o', CharacterStatus.INVALID),
+        ('r', CharacterStatus.MISPLACED),
+        ('n', CharacterStatus.VALID),
+        ('y', CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('bring')
+    my_game.update([
+        ('b', CharacterStatus.INVALID),
+        ('r', CharacterStatus.VALID),
+        ('i', CharacterStatus.INVALID),
+        ('n', CharacterStatus.VALID),
+        ('g', CharacterStatus.VALID)
+    ])

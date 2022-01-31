@@ -3,6 +3,7 @@ import string
 from enum import Enum, auto
 import subprocess
 
+
 def get_words():
     p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
     return p.stdout.decode('utf-8').splitlines()
@@ -14,9 +15,11 @@ class CharacterStatus(Enum):
 
 class Game():
     def __init__(self):
-        self.potential_words = set(get_words())
+        self.potential_words = set(sorted(get_words()))
         self.required_characters = set()
         self.character_positions = [set(string.ascii_lowercase) for _ in range(5)]
+        best_word = self.pick_best_word()
+        print(f'You should probably choose: "{best_word}"...\n\n\n')
 
     # Check if the input word meets current constraints
     def check_valid(self, word):
@@ -60,36 +63,33 @@ class Game():
     # Print the list of words that we could still submit as a guess
     def print_remaining_words(self):
         print('Here are the remaining words you might choose from:')
-        [print(word) for word in sorted(list(self.potential_words))]
+        words = sorted(list(self.potential_words))
+        num_columns = 10
+        rows = [words[i:i+num_columns] for i in range(0, len(words), num_columns)]
+        for row in rows:
+            print(' '.join(row))
         print()
 
+    # Just use a brute force solution, 
+    # the search space is limited to american-english words
+    def get_score(self, word):
+        remaining_words = set(self.potential_words.copy())
+        for (index, char) in enumerate(word):
+            for remaining_word in list(remaining_words):
+                if remaining_word[index] == char:
+                    remaining_words.discard(remaining_word)
+        return len(self.potential_words) - len(remaining_words)
 
-    # Find the number of occurences of each character in each word
-    def get_character_counts(self):
-        my_list = []
-        [my_list.append(dict()) for _ in self.character_positions]
-
-        for word in self.potential_words:
-            for (index, char) in enumerate(word):
-                my_list[index].setdefault(char, 0)
-                my_list[index][char] += 1
-        return my_list
-
-    # Pick the highest scoring word from the remaining set
-    # This will be the word with the highest total character score
-    def pick_best_word(self, character_counts):
+    # Greedy Algorithm, pick the word that will eliminate the most other words
+    def pick_best_word(self):
         max_score = 0
         best_word = None
 
         for word in self.potential_words:
-            score = 0
-            for (index, char) in enumerate(word):
-                score += character_counts[index][char]
+            score = self.get_score(word)
             if score > max_score or best_word is None:
-                best_word = word
-                max_score = score
-        return best_word
-
+                best_word, max_score = word, score
+        return (best_word, max_score)
 
     # Update game state
     def update(self, result):
@@ -113,8 +113,9 @@ class Game():
         # Print the list of remaining words
         self.print_remaining_words()
 
-        character_counts = self.get_character_counts()
-        best_word = self.pick_best_word(character_counts)
+        # Find the next best word
+        best_word = self.pick_best_word()
 
-        print(f'You should probably choose: "{best_word}"...\n\n\n')
+        print(f'You should probably choose: "{best_word}"...\n')
+
 
