@@ -1,4 +1,5 @@
 #!/bin/python3
+from collections import defaultdict
 import string
 from enum import Enum, auto
 import subprocess
@@ -10,14 +11,14 @@ class Game():
         INVALID = auto()
 
     def __init__(self):
-        self.potential_words = set(sorted(self.get_words()))
+        self.potential_words = set(sorted(self.get_word_list()))
         self.required_characters = set()
         self.character_positions = [set(string.ascii_lowercase) for _ in range(5)]
-        best_word = 'aesir'
+        best_word = self.get_next_best_word()
         print(f'To start, you should probably choose: "{best_word}"...\n\n\n')
 
     # We'll build our own wordlist from the american dictionary
-    def get_words(self):
+    def get_word_list(self):
         p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
         return p.stdout.decode('utf-8').splitlines()
 
@@ -83,7 +84,7 @@ class Game():
 
     # Just use a brute force solution, 
     # the search space is limited to american-english words
-    def get_word_score(self, word):
+    def get_word_score_brute_force(self, word):
         remaining_words = set(self.potential_words.copy())
         for (index, char) in enumerate(word):
             for remaining_word in list(remaining_words):
@@ -92,7 +93,7 @@ class Game():
         return len(self.potential_words) - len(remaining_words)
 
     # Greedy Algorithm, pick the word that will eliminate the most other words
-    def get_next_best_word(self):
+    def get_next_best_word_brute_force(self):
         max_score = 0
         best_word = None
 
@@ -101,6 +102,44 @@ class Game():
             if score > max_score or best_word is None:
                 best_word, max_score = word, score
         return (best_word, max_score)
+
+    def build_prefix_tree(self, wordlist):
+        tree_list = [{} for _ in range(5)]
+        # Build the tree
+        for word in wordlist:
+            prev = None
+            for tree, char in zip(tree_list, word):
+                
+                if prev is None:
+                    prev = 'Start'
+                tree.setdefault(char, {'parents': {}})
+                tree[char]["parents"].setdefault(prev, 0)
+                tree[char]["parents"][prev] += 1
+                prev = char
+        return tree_list
+
+    def get_word_score(self, prefix_tree, word):
+        prev = None
+        score = 0
+        for tree, char in zip(prefix_tree, word):
+            for parent in filter(lambda x: x != prev, tree[char]['parents']):
+                score += tree[char]['parents'][parent]
+            prev = char
+        return score
+
+    def get_next_best_word_from_tree(self, prefix_tree):
+        max_score = 0
+        best_word = None
+        for word in self.potential_words:
+            score = self.get_word_score(prefix_tree, word)
+            if score > max_score or best_word is None:
+                best_word, max_score = word, score
+        return (best_word, max_score)        
+                
+    def get_next_best_word(self):
+        prefix_tree = self.build_prefix_tree(self.potential_words)
+        return self.get_next_best_word_from_tree(prefix_tree)
+
 
     # Update game state
     def update(self, result):
@@ -125,5 +164,6 @@ class Game():
         self.print_remaining_words()
 
         # Find the next best word
+        
         best_word = self.get_next_best_word()
         print(f'You should probably choose: "{best_word}"...\n')

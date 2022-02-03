@@ -10,6 +10,16 @@ class TestWordleHelper(unittest.TestCase):
           'aab',
           'bbb',
         ]
-      (best_word, score) = my_game.pick_best_word()
-      self.assertEquals(best_word, 'aab')
-      self.assertEquals(score, 3)
+      (best_word, score) = my_game.get_next_best_word()
+      self.assertEqual(best_word, 'aab')
+      self.assertEqual(score, 3)
+
+
+    def test_tree(self):
+      my_game = wh.Game()
+      my_game.potential_words = [
+          'aaa',
+          'bab',
+          'cca',
+        ]
+      print(my_game.get_next_best_word_from_tree())
