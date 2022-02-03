@@ -1,7 +1,6 @@
 #!/bin/python3
-from collections import defaultdict
-import string
 from enum import Enum, auto
+import string
 import subprocess
 
 class Game():

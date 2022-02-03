@@ -1,4 +1,3 @@
-
 import wordle_helper as wh
 import unittest
 
@@ -22,4 +21,4 @@ class TestWordleHelper(unittest.TestCase):
           'bab',
           'cca',
         ]
-      print(my_game.get_next_best_word_from_tree())
+      print(my_game.get_next_best_word())
