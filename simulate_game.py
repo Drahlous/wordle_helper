@@ -238,5 +238,57 @@ def SimulatePlayerFeb02():
         ('t', my_game.CharacterStatus.VALID)
     ])
 
+def SimulatePlayerFeb03():
+    my_game = Game()
+
+    my_game.remove_word('aries')
+    my_game.remove_word('aires')
+    print(my_game.get_next_best_word())
+
+    my_game.check_valid('sales')
+    my_game.update([
+        ('s', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.MISPLACED),
+        ('l', my_game.CharacterStatus.INVALID),
+        ('e', my_game.CharacterStatus.INVALID),
+        ('s', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('soapy')
+    my_game.update([
+        ('s', my_game.CharacterStatus.VALID),
+        ('o', my_game.CharacterStatus.INVALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('p', my_game.CharacterStatus.INVALID),
+        ('y', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('snack')
+    my_game.update([
+        ('s', my_game.CharacterStatus.VALID),
+        ('n', my_game.CharacterStatus.INVALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('c', my_game.CharacterStatus.INVALID),
+        ('k', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('shaft')
+    my_game.update([
+        ('s', my_game.CharacterStatus.VALID),
+        ('h', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('f', my_game.CharacterStatus.INVALID),
+        ('t', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('shard')
+    my_game.update([
+        ('s', my_game.CharacterStatus.VALID),
+        ('h', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('r', my_game.CharacterStatus.VALID),
+        ('d', my_game.CharacterStatus.VALID)
+    ])
+
 if __name__ == '__main__':
-    SimulatePlayerFeb02()
+    SimulatePlayerFeb03()

@@ -60,6 +60,7 @@ class Game():
             # - Remove this character from the dictionaries of all other positions
             if status is self.CharacterStatus.VALID:
                 self.character_positions[pos] = set(char)
+                self.required_characters.add(char)
 
             # If this spot is invalid, remove it from every alphabet
             elif status is self.CharacterStatus.INVALID:
