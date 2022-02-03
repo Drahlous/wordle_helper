@@ -9,10 +9,11 @@ class Game():
         MISPLACED = auto()
         INVALID = auto()
 
-    def __init__(self):
+    def __init__(self, number_of_characters = 5):
+        self.number_of_characters = number_of_characters
         self.potential_words = set(sorted(self.get_word_list()))
         self.required_characters = set()
-        self.character_positions = [set(string.ascii_lowercase) for _ in range(5)]
+        self.character_positions = [set(string.ascii_lowercase) for _ in range(number_of_characters)]
         best_word = self.get_next_best_word()
         print(f'To start, you should probably choose: "{best_word}"...\n\n\n')
 
@@ -21,26 +22,39 @@ class Game():
         p = subprocess.run('./get_words.sh', stdout=subprocess.PIPE)
         return p.stdout.decode('utf-8').splitlines()
 
+    # Print the list of words that we could still submit as a guess
+    def print_remaining_words(self):
+        print('Here are the remaining words you might choose from:')
+        words = list(self.potential_words)
+        num_columns = 10
+        rows = [words[i:i+num_columns] for i in range(0, len(words), num_columns)]
+        for row in rows:
+            print(' '.join(row))
+        print()
+
     # Remove a word from our list of potential words
     def remove_word(self, word):
         self.potential_words.discard(word)
 
     # Check if the input word meets current constraints
     def check_valid(self, word):
-        # If this word doesn't have one of the required characters, throw out the word
+        # If this word doesn't have one of the required characters, throw it out
         for letter in self.required_characters:
             if letter not in word:
                 return False
-        # If one of the letters in this word is not valid for that position, throw out the word
+
+        # If one of the letters in this word is not valid for that position, throw it out
         for (letter, alphabet) in zip(word, self.character_positions):
             if letter not in alphabet:
                 return False
+
         # Otherwise, the word could be a valid choice
         return True
 
     # Update our knowledge of the positions
     def update_positional_knowledge(self, result):
         for (pos, (char, status)) in enumerate(result):
+
             # If this spot is valid:
             # - Remove every other character from this location's alphabet
             # - Remove this character from the dictionaries of all other positions
@@ -71,74 +85,42 @@ class Game():
             if not self.check_valid(word):
                 self.remove_word(word)
 
-    # Print the list of words that we could still submit as a guess
-    def print_remaining_words(self):
-        print('Here are the remaining words you might choose from:')
-        words = sorted(list(self.potential_words))
-        num_columns = 10
-        rows = [words[i:i+num_columns] for i in range(0, len(words), num_columns)]
-        for row in rows:
-            print(' '.join(row))
-        print()
-
-    # Just use a brute force solution,
-    # the search space is limited to american-english words
-    def get_word_score_brute_force(self, word):
-        remaining_words = set(self.potential_words.copy())
-        for (index, char) in enumerate(word):
-            for remaining_word in list(remaining_words):
-                if remaining_word[index] == char:
-                    remaining_words.discard(remaining_word)
-        return len(self.potential_words) - len(remaining_words)
 
     # Greedy Algorithm, pick the word that will eliminate the most other words
-    def get_next_best_word_brute_force(self):
-        max_score = 0
-        best_word = None
-        for word in self.potential_words:
-            score = self.get_word_score_brute_force(word)
-            if score > max_score or best_word is None:
-                best_word, max_score = word, score
-        return (best_word, max_score)
-
-    def build_prefix_tree(self, wordlist):
-        tree_list = [{} for _ in range(5)]
-        # Build the tree
+    def build_trie(self, wordlist):
+        trie_list = [{} for _ in range(self.number_of_characters)]
         for word in wordlist:
-            prev = None
-            for tree, char in zip(tree_list, word):
-
-                if prev is None:
-                    prev = 'Start'
+            prev = 'Start'
+            for tree, char in zip(trie_list, word):
                 tree.setdefault(char, {'parents': {}})
                 tree[char]["parents"].setdefault(prev, 0)
                 tree[char]["parents"][prev] += 1
                 prev = char
-        return tree_list
+        return trie_list
 
-    def get_word_score(self, prefix_tree, word):
+    def get_word_score(self, trie_list, word):
         prev = None
         score = 0
-        for tree, char in zip(prefix_tree, word):
+        for trie, char in zip(trie_list, word):
             # Filter out the parent from the word we're currently in,
             # since we already counted that one!
-            for parent in filter(lambda x: x != prev, tree[char]['parents']):
-                score += tree[char]['parents'][parent]
+            for parent in filter(lambda x: x != prev, trie[char]['parents']):
+                score += trie[char]['parents'][parent]
             prev = char
         return score
 
-    def get_next_best_word_from_tree(self, prefix_tree):
+    def get_highest_scoring_word(self, trie_list):
         max_score = 0
         best_word = None
         for word in self.potential_words:
-            score = self.get_word_score(prefix_tree, word)
+            score = self.get_word_score(trie_list, word)
             if score > max_score or best_word is None:
                 best_word, max_score = word, score
         return (best_word, max_score)
 
     def get_next_best_word(self):
-        prefix_tree = self.build_prefix_tree(self.potential_words)
-        return self.get_next_best_word_from_tree(prefix_tree)
+        trie_list = self.build_trie(self.potential_words)
+        return self.get_highest_scoring_word(trie_list)
 
 
     # Update game state
