@@ -143,5 +143,100 @@ def SimulatePlayerJan31():
         ('t', my_game.CharacterStatus.VALID)
     ])
 
+def SimulatePlayerFeb01():
+    my_game = Game()
+
+
+    my_game.check_valid('aesir')
+    my_game.update([
+        ('a', my_game.CharacterStatus.INVALID),
+        ('e', my_game.CharacterStatus.MISPLACED),
+        ('s', my_game.CharacterStatus.MISPLACED),
+        ('i', my_game.CharacterStatus.INVALID),
+        ('r', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.remove_word('stess')
+    print(my_game.get_next_best_word())
+
+    my_game.remove_word('ssens')
+    print(my_game.get_next_best_word())
+
+    my_game.remove_word('ssexs')
+    print(my_game.get_next_best_word())
+
+    my_game.check_valid('soles')
+    my_game.update([
+        ('s', my_game.CharacterStatus.MISPLACED),
+        ('o', my_game.CharacterStatus.MISPLACED),
+        ('l', my_game.CharacterStatus.INVALID),
+        ('e', my_game.CharacterStatus.MISPLACED),
+        ('s', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.remove_word('oscoe')
+    print(my_game.get_next_best_word())
+
+    my_game.check_valid('obese')
+    my_game.update([
+        ('o', my_game.CharacterStatus.MISPLACED),
+        ('b', my_game.CharacterStatus.INVALID),
+        ('e', my_game.CharacterStatus.INVALID),
+        ('s', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID)
+    ])
+
+    my_game.check_valid('whose')
+    my_game.update([
+        ('w', my_game.CharacterStatus.INVALID),
+        ('h', my_game.CharacterStatus.VALID),
+        ('o', my_game.CharacterStatus.VALID),
+        ('s', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID)
+    ])
+
+    my_game.check_valid('those')
+    my_game.update([
+        ('t', my_game.CharacterStatus.VALID),
+        ('h', my_game.CharacterStatus.VALID),
+        ('o', my_game.CharacterStatus.VALID),
+        ('s', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID)
+    ])
+
+def SimulatePlayerFeb02():
+    my_game = Game()
+
+    my_game.remove_word('aries')
+    my_game.remove_word('aires')
+    print(my_game.get_next_best_word())
+
+    my_game.check_valid('sales')
+    my_game.update([
+        ('s', my_game.CharacterStatus.MISPLACED),
+        ('a', my_game.CharacterStatus.INVALID),
+        ('l', my_game.CharacterStatus.INVALID),
+        ('e', my_game.CharacterStatus.INVALID),
+        ('s', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('mossy')
+    my_game.update([
+        ('m', my_game.CharacterStatus.VALID),
+        ('o', my_game.CharacterStatus.VALID),
+        ('s', my_game.CharacterStatus.INVALID),
+        ('s', my_game.CharacterStatus.VALID),
+        ('y', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('moist')
+    my_game.update([
+        ('m', my_game.CharacterStatus.VALID),
+        ('o', my_game.CharacterStatus.VALID),
+        ('i', my_game.CharacterStatus.VALID),
+        ('s', my_game.CharacterStatus.VALID),
+        ('t', my_game.CharacterStatus.VALID)
+    ])
+
 if __name__ == '__main__':
-    SimulatePlayerJan31()
+    SimulatePlayerFeb02()

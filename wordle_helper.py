@@ -82,7 +82,7 @@ class Game():
             print(' '.join(row))
         print()
 
-    # Just use a brute force solution, 
+    # Just use a brute force solution,
     # the search space is limited to american-english words
     def get_word_score_brute_force(self, word):
         remaining_words = set(self.potential_words.copy())
@@ -96,9 +96,8 @@ class Game():
     def get_next_best_word_brute_force(self):
         max_score = 0
         best_word = None
-
         for word in self.potential_words:
-            score = self.get_word_score(word)
+            score = self.get_word_score_brute_force(word)
             if score > max_score or best_word is None:
                 best_word, max_score = word, score
         return (best_word, max_score)
@@ -109,7 +108,7 @@ class Game():
         for word in wordlist:
             prev = None
             for tree, char in zip(tree_list, word):
-                
+
                 if prev is None:
                     prev = 'Start'
                 tree.setdefault(char, {'parents': {}})
@@ -122,6 +121,8 @@ class Game():
         prev = None
         score = 0
         for tree, char in zip(prefix_tree, word):
+            # Filter out the parent from the word we're currently in,
+            # since we already counted that one!
             for parent in filter(lambda x: x != prev, tree[char]['parents']):
                 score += tree[char]['parents'][parent]
             prev = char
@@ -134,8 +135,8 @@ class Game():
             score = self.get_word_score(prefix_tree, word)
             if score > max_score or best_word is None:
                 best_word, max_score = word, score
-        return (best_word, max_score)        
-                
+        return (best_word, max_score)
+
     def get_next_best_word(self):
         prefix_tree = self.build_prefix_tree(self.potential_words)
         return self.get_next_best_word_from_tree(prefix_tree)
@@ -164,6 +165,5 @@ class Game():
         self.print_remaining_words()
 
         # Find the next best word
-        
         best_word = self.get_next_best_word()
         print(f'You should probably choose: "{best_word}"...\n')
