@@ -113,7 +113,8 @@ class Game():
     def get_highest_scoring_word(self, trie_list):
         max_score = 0
         best_word = None
-        for word in self.potential_words:
+        # Sort here, just to keep the game reproducible
+        for word in sorted(self.potential_words):
             score = self.get_word_score(trie_list, word)
             if score > max_score or best_word is None:
                 best_word, max_score = word, score

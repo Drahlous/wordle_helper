@@ -290,5 +290,65 @@ def SimulatePlayerFeb03():
         ('d', my_game.CharacterStatus.VALID)
     ])
 
+def SimulatePlayerFeb04():
+    my_game = Game()
+    my_game.remove_word('aries')
+    my_game.remove_word('aires')
+    print(my_game.get_next_best_word())
+
+    my_game.check_valid('sales')
+    my_game.update([
+        ('s', my_game.CharacterStatus.INVALID),
+        ('a', my_game.CharacterStatus.MISPLACED),
+        ('l', my_game.CharacterStatus.MISPLACED),
+        ('e', my_game.CharacterStatus.MISPLACED),
+        ('s', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('algae')
+    my_game.update([
+        ('a', my_game.CharacterStatus.INVALID),
+        ('l', my_game.CharacterStatus.VALID),
+        ('g', my_game.CharacterStatus.INVALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.MISPLACED)
+    ])
+
+    my_game.check_valid('clear')
+    my_game.update([
+        ('c', my_game.CharacterStatus.INVALID),
+        ('l', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('r', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('bleak')
+    my_game.update([
+        ('b', my_game.CharacterStatus.INVALID),
+        ('l', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('k', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('plead')
+    my_game.update([
+        ('p', my_game.CharacterStatus.VALID),
+        ('l', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('d', my_game.CharacterStatus.INVALID)
+    ])
+
+    my_game.check_valid('pleat')
+    my_game.update([
+        ('p', my_game.CharacterStatus.VALID),
+        ('l', my_game.CharacterStatus.VALID),
+        ('e', my_game.CharacterStatus.VALID),
+        ('a', my_game.CharacterStatus.VALID),
+        ('t', my_game.CharacterStatus.VALID)
+    ])
+
 if __name__ == '__main__':
-    SimulatePlayerFeb03()
+    SimulatePlayerFeb04()
